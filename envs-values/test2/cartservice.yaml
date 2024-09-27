@@ -1,0 +1,7 @@
+image:
+  tag: v0.2.5
+
+redis:
+  cluster:
+    enabled: false
+  usePassword: false

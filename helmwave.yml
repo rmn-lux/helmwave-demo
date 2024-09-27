@@ -1,0 +1,91 @@
+version: 0.41.1
+
+.options: &options
+  namespace: test1
+  wait: true
+  timeout: 5m
+  max_history: 3 # best practice
+  create_namespace: true
+
+releases:
+
+- name: adservice
+  chart:
+    name: charts/adservice
+  tags: [adservice]
+  values:
+    - envs-values/test1/adservice.yaml
+  <<: *options
+
+- name: cartservice
+  chart:
+    name: charts/cartservice
+  tags: [cartservice]
+  values:
+    - envs-values/test1/cartservice.yaml
+  <<: *options
+
+- name: checkoutservice
+  chart:
+    name: charts/checkoutservice
+  tags: [checkoutservice]
+  values:
+    - envs-values/test1/checkoutservice.yaml
+  <<: *options
+
+- name: currencyservice
+  chart:
+    name: charts/currencyservice
+  tags: [currencyservice]
+  values:
+    - envs-values/test1/currencyservice.yaml
+  <<: *options
+
+- name: emailservice
+  chart:
+    name: charts/emailservice
+  tags: [emailservice]
+  values:
+    - envs-values/test1/emailservice.yaml
+  <<: *options
+
+- name: frontend
+  chart:
+    name: charts/frontend
+  tags: [frontend]
+  values:
+    - envs-values/test1/frontend.yaml
+  <<: *options
+
+- name: paymentservice
+  chart:
+    name: charts/paymentservice
+  tags: [paymentservice]
+  values:
+    - envs-values/test1/paymentservice.yaml
+  <<: *options
+
+- name: productcatalogservice
+  chart:
+    name: charts/productcatalogservice
+  tags: [productcatalogservice]
+  values:
+    - envs-values/test1/productcatalogservice.yaml
+  <<: *options
+
+- name: recommendationservice
+  chart:
+    name: charts/recommendationservice
+  tags: [recommendationservice]
+  values:
+    - envs-values/test1/recommendationservice.yaml
+  <<: *options
+
+- name: shippingservice
+  chart:
+    name: charts/shippingservice
+  tags: [shippingservice]
+  values:
+    - envs-values/test1/shippingservice.yaml
+  <<: *options
+

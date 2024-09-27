@@ -1,0 +1,67 @@
+name: Deploy
+on:
+  push:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Create k8s Kind Cluster
+        uses: helm/kind-action@v1.2.0
+      - uses: helmwave/setup-action@v0.2.0
+        name: Install helmwave
+        with:
+          version: "0.19.5"
+      - name: Set environment for branch
+        run: |
+          if [[ $GITHUB_REF == 'refs/heads/main' ]]; then
+              echo "CI_ENVIRONMENT_NAME=prod" >> "$GITHUB_ENV"
+          else
+              echo "CI_ENVIRONMENT_NAME=stage" >> "$GITHUB_ENV"
+          fi
+      - name: plan
+        run: |
+          echo "Building plan for $CI_ENVIRONMENT_NAME"
+          helmwave build --yml
+      - name: Scan repo with kube-linter
+        uses: stackrox/kube-linter-action@v1.0.4
+        with:
+          directory: .helmwave
+          config: .kube-linter/config.yaml
+      - name: Kubeval
+        uses: instrumenta/kubeval-action@master
+        with:
+          files: .helmwave/manifest/
+      - name: Download Pluto
+        uses: FairwindsOps/pluto/github-action@master
+      - name: Use pluto
+        run: |
+          pluto detect-files -d .helmwave/
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v2
+      - name: Create k8s Kind Cluster
+        uses: helm/kind-action@v1.2.0
+      - uses: helmwave/setup-action@v0.2.0
+        name: Install helmwave
+        with:
+          version: "0.19.5"
+      - name: Set environment for branch
+        run: |
+          if [[ $GITHUB_REF == 'refs/heads/main' ]]; then
+              echo "CI_ENVIRONMENT_NAME=prod" >> "$GITHUB_ENV"
+          else
+              echo "CI_ENVIRONMENT_NAME=stage" >> "$GITHUB_ENV"
+          fi
+          echo "CI_ENVIRONMENT_NAME is $CI_ENVIRONMENT_NAME"
+      - name: plan
+        run: |
+          echo "Building plan for $CI_ENVIRONMENT_NAME"
+          helmwave build --yml --diff-mode=local
+      - name: deploy
+        run: |
+          echo "Deploying to $CI_ENVIRONMENT_NAME"
+          helmwave up --kubedog
